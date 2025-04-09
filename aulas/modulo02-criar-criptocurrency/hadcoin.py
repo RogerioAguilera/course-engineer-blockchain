@@ -59,11 +59,12 @@ class Blockchain:
             previous_block = block
             block_index += 1
         return True
+    def add_transaction(self,sender,receiver,amount):
+        self.transactions.append({'sender':sender,'receiver':receiver,'amount':amount})
+        previous_block = self.get_previous_block()
+        return previous_block['index'] +1
 
-# Parte 2: Minerar a Blockchain (Aplicação Web com Flask)
-# Correção 2: Mover a configuração do Flask para fora da classe
 
-# Criar a Aplicação Web
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False # Opcional: desabilita a formatação "bonita"
 
