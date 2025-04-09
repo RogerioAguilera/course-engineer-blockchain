@@ -1,20 +1,24 @@
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify # Correção 1: Importação correta
+from flask import Flask, jsonify
+import requests
+from uuid import uuid4
+from urllib.parse import urlparse
 
-# Parte 1: Criar Blockchain
 class Blockchain:
     def __init__(self):
         self.chain = []
-        # Cria o bloco genesis
+        self.transactions = []
         self.create_block(proof=1, previous_hash='0')
 
     def create_block(self, proof, previous_hash):
         block = {'index': len(self.chain) + 1,
                  'timestamp': str(datetime.datetime.now()),
                  'proof': proof,
-                 'previous_hash': previous_hash} # Correção 3: Typo corrigido
+                 'previous_hash': previous_hash} 
+
+        self.transactions=[]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
         self.chain.append(block)
         return block
 
