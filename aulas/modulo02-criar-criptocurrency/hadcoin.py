@@ -48,10 +48,8 @@ class Blockchain:
         block_index = 1
         while block_index < len(chain):
             block = chain[block_index]
-            # Verifica se o hash do bloco anterior corresponde ao previous_hash do bloco atual
             if block['previous_hash'] != self.hash(previous_block):
                 return False
-            # Verifica se a prova de trabalho é válida
             previous_proof = previous_block['proof']
             proof = block['proof']
             hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest() # Correção 5: Lógica/Typo corrigido
@@ -86,43 +84,38 @@ class Blockchain:
         return False
 
 app = Flask(__name__)
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False # Opcional: desabilita a formatação "bonita"
+node_address = str(uuid4()).replace('-','')
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False 
 
-# Criar uma instância da Blockchain
 blockchain = Blockchain()
 
-# Rota para minerar um novo bloco
-@app.route('/mine_block', methods=['GET']) # Correção 8: Adicionar '/'
+@app.route('/mine_block', methods=['GET'])
 def mine_block():
-    # Obter o último bloco e sua prova
-    previous_block_dict = blockchain.get_previous_block() # Correção 6: Manter o dict do bloco anterior
-    previous_proof = previous_block_dict['proof']
+    previous_block= blockchain.get_previous_block() 
+    previous_proof = previous_block['proof']
 
-    # Encontrar a nova prova
     proof = blockchain.proof_of_work(previous_proof)
 
-    # Obter o hash do bloco anterior
-    previous_hash = blockchain.hash(previous_block_dict) # Correção 6: Calcular hash do dict
+    previous_hash = blockchain.hash(previous_block)
+    blockchain.add_transaction(sender=node_address,receiver='Rogerio',1)
 
-    # Criar o novo bloco
     block = blockchain.create_block(proof, previous_hash)
 
-    # Preparar a resposta
     response = {'message': 'Parabéns, você minerou um bloco!',
-                'index': block['index'], # Correção 7: Usar string como chave
+                'index': block['index'], 
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
-                'previous_hash': block['previous_hash']}
+                'previous_hash': block['previous_hash'],
+                'transaction': block['transaction']}
+    
     return jsonify(response), 200
 
-# Rota para obter a chain completa
 @app.route('/get_chain', methods=['GET'])
 def get_chain():
     response = {'chain': blockchain.chain,
                 'length': len(blockchain.chain)}
     return jsonify(response), 200
 
-# Rota para verificar a validade da chain
 @app.route('/is_valid', methods = ['GET'])
 def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
@@ -131,6 +124,18 @@ def is_valid():
     else:
         response = {'message': 'Houston, temos um problema. O Blockchain não é válido.'}
     return jsonify(response), 200
+
+@app.route('/add_transaction', methods = ['POST'])
+def add_transaction():
+    json = requests.get_json()
+    transaction_keys = ['sender', 'receiver', 'amount']
+    if not all(key in json for key in transaction_keys)
+        return 'Alguns elementos estão faltando', 400
+    index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
+    response = {'message': f'Esta transaction será adicionada ao bloco {index}'}
+    return jsonify(response), 201
+  
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
