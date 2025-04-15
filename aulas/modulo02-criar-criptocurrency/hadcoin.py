@@ -135,6 +135,28 @@ def add_transaction():
     response = {'message': f'Esta transaction será adicionada ao bloco {index}'}
     return jsonify(response), 201
   
+@app.route('/connect_node',methods= ['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if nodes is None:       
+        return "Vazio", 400
+    for node in Nodes:
+        blockchain.add_node(node)
+        response= {'message': 'Todos nós conectados, blockchain contem os seguintes nós:',
+                   'total_nodes': list(blockchain.nodes)}
+        return jsonify(response), 201
+    
+@app.route('/replace_chain', methods= ['GET'])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced:
+        response = {'message':'Os nós tinham cadeias diferentes, então foi substituída',
+                    'new_chain', blockchain.chain}
+    else:
+        response = {'message':'Tudo certo, não houve substituição',
+                    'actual_chain', blockchain.chain}
+        return jsonify(response), 201
 
 
 if __name__ == '__main__':
