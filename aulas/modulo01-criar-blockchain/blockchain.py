@@ -107,6 +107,5 @@ def is_valid():
         response = {'message': 'Houston, temos um problema. O Blockchain não é válido.'}
     return jsonify(response), 200
 
-# Executar a aplicação
-if __name__ == '__main__': # Correção 9: Boa prática
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
